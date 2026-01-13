@@ -1,4 +1,4 @@
-name: Sir FlipReset Watcher ⚔️
+name: Sir FlipReset Watcher
 
 on:
   schedule:
@@ -8,12 +8,20 @@ on:
 jobs:
   mmr:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: 🏹 Checkout
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
-      - run: node mmr-watcher.js
+
+      - name: 📦 Install deps
+        run: npm install
+
+      - name: ⚔️ Run watcher
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: npm start
