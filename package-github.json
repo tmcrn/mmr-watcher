@@ -1,0 +1,23 @@
+{
+  "name": "mmr-watcher-github-action",
+  "version": "1.0.0",
+  "description": "⚔️ MMR Watcher with GitHub Actions",
+  "main": "mmr-watcher-scraper.js",
+  "type": "module",
+  "scripts": {
+    "start": "node mmr-watcher-scraper.js",
+    "test": "node mmr-watcher-scraper.js"
+  },
+  "keywords": [
+    "rocket-league",
+    "mmr",
+    "tracker",
+    "github-actions"
+  ],
+  "author": "Timothé",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^24.35.0",
+    "node-fetch": "^3.3.2"
+  }
+}
