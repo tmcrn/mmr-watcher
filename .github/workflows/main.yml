@@ -3,7 +3,7 @@ name: MMR Watcher
 on:
   schedule:
     # Toutes les 2 minutes
-    - cron: '*/2 * * * *'
+    # - cron: '*/2 * * * *'
   workflow_dispatch: # Permet de lancer manuellement
 
 jobs:
