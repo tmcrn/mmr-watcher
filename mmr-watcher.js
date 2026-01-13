@@ -1,70 +1,56 @@
-import fetch from 'node-fetch';
-import fs from 'fs';
+import { fetchProfile } from "trn-rocket-league";
+import fetch from "node-fetch";
 
-const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/..."; // ton webhook
-const PLAYER_HANDLE = "Snowthy";
-const PLATFORM = "epic"; // selon ton JSON
-const MMR_PER_GAME = 9;
-const TARGET_MMR = 2000;
+// ================= CONFIG =================
+const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK;
+const PLAYER = "Snowthy";
+const PLATFORM = "epic"; // epic | steam | psn | xbl
+const TARGET_MMR = 1315;
+const MMR_PER_WIN = 9;
 
-const PLAYLISTS = {
-    "1v1": 10,
-    "2v2": 11,
-    "3v3": 12
-};
-
-async function checkMMR() {
-    try {
-        const res = await fetch(`https://public-api.tracker.gg/v2/rocket-league/standard/profile/${PLATFORM}/${PLAYER_HANDLE}`, {
-            headers: { "TRN-Api-Key": "public" }
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        const segments = data.data.segments || [];
-
-        // Extraire MMR pour chaque playlist
-        const mmrData = {};
-        for (const [mode, id] of Object.entries(PLAYLISTS)) {
-            const playlist = segments.find(s => s.attributes?.playlistId === id);
-            if (playlist && playlist.stats.rating) {
-                mmrData[mode] = playlist.stats.rating.value;
-            }
-        }
-
-        if (Object.keys(mmrData).length === 0) {
-            console.log("⚠️ Aucun MMR trouvé dans le JSON");
-            return;
-        }
-
-        // Lire ancien MMR
-        let lastMMR = {};
-        if (fs.existsSync("state.json")) lastMMR = JSON.parse(fs.readFileSync("state.json", "utf8"));
-
-        // Comparer et notifier Discord
-        for (const [mode, mmr] of Object.entries(mmrData)) {
-            const old = lastMMR[mode] || mmr;
-            if (mmr !== old) {
-                const diff = mmr - old;
-                const result = diff > 0 ? "WIN 🟢" : "LOSS 🔴";
-                const gamesLeft = Math.ceil((TARGET_MMR - mmr) / MMR_PER_GAME);
-
-                await fetch(DISCORD_WEBHOOK, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        content: `⚔️ ${mode}: ${result}\nMMR: ${old} → ${mmr}\nEncore ~${gamesLeft} wins pour up`
-                    })
-                });
-            }
-        }
-
-        fs.writeFileSync("state.json", JSON.stringify(mmrData, null, 2));
-        console.log("✅ MMR mis à jour :", mmrData);
-
-    } catch (err) {
-        console.error("❌ Erreur :", err.message);
-    }
+if (!DISCORD_WEBHOOK) {
+    throw new Error("❌ DISCORD_WEBHOOK non défini");
 }
 
-checkMMR();
+// =========================================
+async function sendDiscordMessage(message) {
+    const res = await fetch(DISCORD_WEBHOOK, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: message })
+    });
+
+    console.log("📨 Webhook status:", res.status);
+}
+
+async function checkMMR() {
+    console.log("⚔️ Sir FlipReset part en reconnaissance...");
+
+    const profile = await fetchProfile(PLAYER, PLATFORM);
+
+    const mmr = {
+        "1v1": profile.stats.ranked.duel.mmr,
+        "2v2": profile.stats.ranked.double.mmr,
+        "3v3": profile.stats.ranked.standard.mmr
+    };
+
+    const message =
+        `⚔️ **Sir FlipReset – Rapport de bataille**
+👤 **${PLAYER}**
+
+🥊 1v1 : **${mmr["1v1"]}**
+🤝 2v2 : **${mmr["2v2"]}**
+🏹 3v3 : **${mmr["3v3"]}**
+
+🎯 Objectif : ${TARGET_MMR} MMR
+🧮 ~${Math.max(0, Math.ceil((TARGET_MMR - mmr["2v2"]) / MMR_PER_WIN))} wins restantes`;
+
+    await sendDiscordMessage(message);
+
+    console.log("✅ Rapport envoyé avec succès");
+}
+
+checkMMR().catch(err => {
+    console.error("❌ Erreur fatale :", err);
+    process.exit(1);
+});

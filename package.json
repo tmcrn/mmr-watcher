@@ -2,9 +2,10 @@
   "name": "mmr-watcher",
   "version": "1.0.0",
   "description": "",
-  "main": "mmr-watcher.js",
+  "main": "mmr-watcher-change.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node mmr-watcher.js"
   },
   "private": true,
   "keywords": [],
@@ -16,6 +17,7 @@
     "cheerio": "^1.1.2",
     "fs": "^0.0.1-security",
     "node-fetch": "^3.3.2",
-    "puppeteer": "^24.35.0"
+    "puppeteer": "^24.35.0",
+    "trn-rocket-league": "^2.6.9"
   }
 }
