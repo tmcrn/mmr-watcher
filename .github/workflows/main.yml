@@ -2,7 +2,6 @@ name: Sir FlipReset Watcher ⚔️
 
 on:
   schedule:
-    - cron: "*/10 * * * *"   # toutes les 10 minutes
   workflow_dispatch:        # bouton "Run workflow"
 
 jobs:
