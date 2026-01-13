@@ -2,26 +2,18 @@ name: Sir FlipReset Watcher ⚔️
 
 on:
   schedule:
-    - cron: "*/10 * * * *"   # toutes les 10 minutes
-  workflow_dispatch:        # bouton "Run workflow"
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
 
 jobs:
   mmr:
     runs-on: ubuntu-latest
-
     steps:
-      - name: 🧾 Checkout
-        uses: actions/checkout@v4
-
-      - name: 🟢 Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
-
-      - name: 📦 Install dependencies
-        run: npm install
-
-      - name: ⚔️ Run Sir FlipReset
-        run: node mmr-watcher.js
+      - run: npm install
+      - run: node mmr-watcher.js
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
